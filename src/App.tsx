@@ -88,7 +88,7 @@ export default function Home() {
 
   useEffect(() => {
     const handleShortcut = (event: KeyboardEvent) => {
-      if (event.altKey && event.key.toLowerCase() === "k") { // BUG-06: 误用 altKey
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") { // BUG-06: 使用 ⌘/Ctrl + K
         event.preventDefault();
         setCommandOpen(true);
       }
@@ -103,8 +103,8 @@ export default function Home() {
     let completionTimer: number | undefined;
     const timer = window.setInterval(() => {
       setProgress((current) => {
-        const next = Math.min(current + 4, 92); // BUG-03: 上限被硬编码为 92
-        if (next === 92) {
+        const next = Math.min(current + 4, 100); // BUG-03: 上限到 100
+        if (next === 100) {
           window.clearInterval(timer);
           completionTimer = window.setTimeout(() => {
             setDemoComplete(true);
@@ -131,20 +131,18 @@ export default function Home() {
     setDemoRunning(true);
     setDemoPaused(false);
     setDemoComplete(false);
-    setRunCount((count) => count - 1); // BUG-04: 运算符方向写反
+    setRunCount((count) => count + 1); // BUG-04: 每次启动计数 +1
   };
 
   const pauseDemo = () => {
-    // BUG-05: 暂停错误地执行了完整重置,进度与日志全部清零
+    // BUG-05: 暂停只停止运行并标记暂停,保留进度与完成状态
     setDemoRunning(false);
-    setDemoPaused(false);
-    setProgress(0);
-    setDemoComplete(false);
+    setDemoPaused(true);
   };
 
   const selectWorkflow = (index: number) => {
-    // BUG-08: 保存状态时错误地减 1
-    setActiveWorkflow(Math.max(index - 1, 0));
+    // BUG-08: 保存当前选中步骤
+    setActiveWorkflow(index);
   };
 
   const showNextStory = () => {
@@ -152,8 +150,8 @@ export default function Home() {
   };
 
   const copyCommand = async () => {
-    // BUG-07: 写入剪贴板的命令与界面展示不一致(卸载命令)
-    await navigator.clipboard.writeText("npm uninstall -g @codem/cli");
+    // BUG-07: 写入剪贴板使用与界面一致的安装命令
+    await navigator.clipboard.writeText(installCommand);
     setCopied(true);
     window.setTimeout(() => setCopied(false), 1800);
   };
@@ -185,7 +183,7 @@ export default function Home() {
           <a href="#security">企业安全</a>
         </nav>
         <div className="header-actions">
-          <span className="live-status"><i /><b>系统离线</b></span>{/* BUG-09: 绿灯配离线文案 */}
+          <span className="live-status"><i /><b>系统在线</b></span>{/* BUG-09: 绿灯配在线文案 */}
           <button className="command-button" type="button" onClick={() => setCommandOpen(true)}>快速启动 <kbd>⌘ K</kbd></button>
         </div>
       </header>
