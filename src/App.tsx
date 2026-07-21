@@ -135,11 +135,22 @@ export default function Home() {
   };
 
   const pauseDemo = () => {
-    // BUG-05: 暂停错误地执行了完整重置,进度与日志全部清零
-    setDemoRunning(false);
-    setDemoPaused(false);
-    setProgress(0);
-    setDemoComplete(false);
+    // BUG-05: 暂停/继续/重置共用此函数,需根据当前状态区分语义
+    if (demoRunning) {
+      // 正在运行 → 执行暂停:停止运行并标记已暂停,保留 progress 与 demoComplete
+      setDemoRunning(false);
+      setDemoPaused(true);
+    } else if (demoPaused) {
+      // 已暂停 → 执行继续:恢复运行并取消暂停标记,保留 progress
+      setDemoRunning(true);
+      setDemoPaused(false);
+    } else {
+      // 完成/初始态 → 执行重置:清零 progress,回到就绪态
+      setProgress(0);
+      setDemoPaused(false);
+      setDemoComplete(false);
+      setDemoRunning(false);
+    }
   };
 
   const selectWorkflow = (index: number) => {
