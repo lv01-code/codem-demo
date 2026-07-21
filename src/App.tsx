@@ -131,7 +131,7 @@ export default function Home() {
     setDemoRunning(true);
     setDemoPaused(false);
     setDemoComplete(false);
-    setRunCount((count) => count - 1); // BUG-04: 运算符方向写反
+    setRunCount((count) => count + 1); // 启动一次任务，今日任务数 +1
   };
 
   const pauseDemo = () => {
